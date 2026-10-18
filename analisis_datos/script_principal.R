@@ -1,18 +1,17 @@
-# script_principal.R
+# analisis_datos/script_principal.R
 # Análisis de datos: fertilidad en Argentina vs. el mundo (Banco Mundial)
-# Corrida desde el directorio analisis_datos/
 
-set.seed(123)
+set.seed(456)
 
 library(tidyverse)
 library(WDI)
 
-source("funciones.R")
+source("analisis_datos/funciones.R")
 
 # ---- 1. Datos ---------------------------------------------------------------
-# Si ya bajamos los datos, los leemos del CSV (reproducible y sin internet).
-dir.create("data", showWarnings = FALSE)
-archivo <- "data/wdi.csv"
+# Si ya bajamos los datos, los leemos del CSV
+dir.create("analisis_datos/data", showWarnings = FALSE)
+archivo <- "analisis_datos/data/wdi.csv"
 
 if (file.exists(archivo)) {
   wdi <- read_csv(archivo, show_col_types = FALSE)
@@ -68,18 +67,13 @@ ggplot(caida, aes(cambio)) +
        x = "Cambio en hijos por mujer", y = "Cantidad de países")
 
 # ---- 4. Pregunta 2: ¿Cuándo cruzó el nivel de reemplazo? --------------------
+# ya_debajo = TRUE significa que el país ya estaba por debajo de 2.1 en su
+# primer año con dato (1990), así que el cruce real no se observa.
 wdi |>
-  anio_umbral <- function(df, umbral = 2.1) {
-    df |>
-      dplyr::filter(!is.na(fertilidad)) |>
-      dplyr::group_by(country) |>
-      dplyr::summarise(
-        anio_inicio = min(year),
-        anio_cruce  = if (any(fertilidad <= umbral)) min(year[fertilidad <= umbral]) else NA_integer_,
-        ya_debajo   = !is.na(anio_cruce) & anio_cruce == anio_inicio,
-        .groups = "drop"
-      )
-  }
+  anio_umbral(2.1) |>
+  filter(country %in% c("Argentina", "Chile", "Uruguay", "Brazil",
+                        "Spain", "Italy", "Japan")) |>
+  arrange(anio_cruce)
 
 # ---- 5. Pregunta 3: ¿Con qué se correlaciona la fertilidad? -----------------
 datos_corr <- wdi |>
@@ -102,4 +96,3 @@ ggplot(datos_corr, aes(terciaria, fertilidad)) +
              color = "red", size = 3) +
   labs(title = paste("Fertilidad vs. educación terciaria,", anio_corr),
        x = "Matrícula terciaria (%)", y = "Hijos por mujer")
-
