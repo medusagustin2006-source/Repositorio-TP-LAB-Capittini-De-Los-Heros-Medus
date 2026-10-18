@@ -32,8 +32,8 @@ mis_tantos <- contar_tantos(mi_mano)
 
 prob_perder <- prob_oponente_gana_exacta(mi_mano, mazo_restante, yo_soy_mano = TRUE)
 
-cat(sprintf("Mis cartas suman", mis_tantos))
-cat(sprintf("Probabilidad exacta de que el oponente me gane", prob_perder))
+cat(sprintf("Mis cartas suman %d tantos\n", mis_tantos))
+cat(sprintf("Probabilidad exacta de que el oponente me gane: %.4f\n", prob_perder))
 
 # --- Inciso 5: Simulación 6 jugadores (Monte Carlo) ---
 N_sim <- 10000 
@@ -78,7 +78,7 @@ for (i in 1:N_sim) {
 }
 
 prob_equipo <- victorias_equipo / simulaciones_validas
-cat(sprintf("Basado en escenarios válidos, la prob. de que mi equipo gane", 
+cat(sprintf("Escenarios válidos: %d. Prob. de que mi equipo gane: %.4f\n",
             simulaciones_validas, prob_equipo))
 
 # --- Inciso 6 (Opcional): Histograma del máximo rival ---
