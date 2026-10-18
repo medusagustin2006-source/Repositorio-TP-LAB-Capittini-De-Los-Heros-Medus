@@ -1,8 +1,5 @@
-# funciones.R -- funciones auxiliares del ejercicio de análisis de datos
-# (solo definiciones; se llaman desde script_principal.R con source())
+# analisis_datos/funciones.R 
 
-# Descarga indicadores del Banco Mundial, saca agregados regionales
-# (World, OECD, etc.) y devuelve un data frame en formato largo por país-año.
 bajar_wdi <- function(indicadores, desde = 1990, hasta = 2023) {
   WDI::WDI(country = "all", indicator = indicadores,
            start = desde, end = hasta, extra = TRUE) |>
@@ -29,10 +26,20 @@ ultimo_anio_valido <- function(df, variable, min_paises = 100) {
 }
 
 # Primer año en que cada país llega a un umbral de fertilidad
-# (2.1 hijos por mujer = nivel de reemplazo)
+# (2.1 hijos por mujer = nivel de reemplazo). ya_debajo indica si el país
+# ya estaba por debajo en su primer año con dato (el cruce no es observable).
 anio_umbral <- function(df, umbral = 2.1) {
   df |>
-    dplyr::filter(!is.na(fertilidad), fertilidad <= umbral) |>
+    dplyr::filter(!is.na(fertilidad)) |>
+    dplyr::group_by(country) |>
+    dplyr::summarise(
+      anio_inicio = min(year),
+      anio_cruce  = if (any(fertilidad <= umbral)) min(year[fertilidad <= umbral]) else NA_integer_,
+      ya_debajo   = !is.na(anio_cruce) & anio_cruce == anio_inicio,
+      .groups = "drop"
+    )
+}
+
     dplyr::group_by(country) |>
     dplyr::summarise(anio_cruce = min(year), .groups = "drop")
 }
