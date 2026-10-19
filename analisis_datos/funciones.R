@@ -39,8 +39,3 @@ anio_umbral <- function(df, umbral = 2.1) {
       .groups = "drop"
     )
 }
-
-    dplyr::group_by(country) |>
-    dplyr::summarise(anio_cruce = min(year), .groups = "drop")
-}
-
